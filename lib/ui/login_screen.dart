@@ -1,8 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ecommerce/const/AppColors.dart';
+import 'package:flutter_ecommerce/ui/home_screen.dart';
 import 'package:flutter_ecommerce/ui/registration_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -10,7 +14,56 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _obscureText = true;
+
+  signIn() async {
+    // check user input is not empty
+    if (_emailController.text.isEmpty) {
+      return Fluttertoast.showToast(
+          msg: 'Please enter your email address',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0.sp);
+    }
+
+    if (_passwordController.text.isEmpty) {
+      return Fluttertoast.showToast(
+          msg: 'Please enter your email address',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0.sp);
+    }
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text
+      );
+      var authCredential = credential.user;
+      print(authCredential!.uid);
+
+      if (authCredential.uid.isNotEmpty) {
+        Navigator.push(context, CupertinoPageRoute(builder: (_) => HomeScreen()));
+      } else {
+        return Fluttertoast.showToast(msg: 'Something went wrong');
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        return Fluttertoast.showToast(msg: 'No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        return Fluttertoast.showToast(msg: 'The password you have provided was wrong.');
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             Expanded(
                               child: TextField(
+                                controller: _emailController,
                                 decoration: InputDecoration(
                                   hintText: "mail@example.com",
                                   hintStyle: TextStyle(
@@ -139,6 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             Expanded(
                               child: TextField(
+                                controller: _passwordController,
                                 obscureText: _obscureText,
                                 decoration: InputDecoration(
                                   hintText: "password must be 6 character",
@@ -187,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 40.h,
                           child: ElevatedButton(
                             onPressed: () {
-
+                              signIn();
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.deepOrange,
