@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ecommerce/ui/bottom_nav_controller.dart';
 import 'package:flutter_ecommerce/widgets/custom_button.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -53,12 +54,12 @@ class _UserFormState extends State<UserForm> {
           "age": _ageController.text,
         })
         .then((value) => {
-              print("User Form Data Added"),
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Data Saved Successfully"),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BottomNavController(),
                 ),
-              ),
+              )
             })
         .catchError((error) => {
               print("something is wrong. $error"),
